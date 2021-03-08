@@ -1,0 +1,35 @@
+version: '3'
+services:
+    snipeit:
+        image: snipe/snipe-it
+        container_name: snipeit
+        restart: always
+        env_file:
+            - snipeit.env
+            - mysql.env
+        labels:
+            traefik.enable: true
+            traefik.backend: snipe-it
+            traefik.frontend.rule: "Host:snipeit.mywebsite.com" # [CHANGEME]
+            traefik.docker.network: proxy
+            traefik.port: 80
+        networks:
+            - proxy
+            - internal
+        depends_on:
+            - snipeit_db
+    snipeit_db:
+        image: mysql:5.6
+        env_file:
+            mysql.env
+        labels:
+            traefik.enable: false
+        networks:
+            - internal
+        volumes:
+            - ./mysql_data:/var/lib/mysql
+networks:
+    internal:
+        external: true
+    proxy:
+        external: true
